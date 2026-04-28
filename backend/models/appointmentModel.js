@@ -26,11 +26,21 @@ const appointmentSchema = new mongoose.Schema({
   payment: { type: Boolean, default: false },
   isCompleted: { type: Boolean, default: false },
 
-  // ⭐ NEW FIELD → Prescription text saved in DB
+  // NEW FIELD → Prescription text saved in DB
   prescription: {
     type: String,
     default: "",
   },
+  // Medical record fields
+diagnosis: {
+  type: String,
+  default: "",
+},
+
+notes: {
+  type: String,
+  default: "",
+},
 });
 
 const appointmentModel =

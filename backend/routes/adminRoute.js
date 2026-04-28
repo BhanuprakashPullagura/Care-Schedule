@@ -7,7 +7,7 @@ import {
   appointmentsAdmin,
   loginAdmin,
   deleteDoctor,
-  changeAvailability   // ✅ ADDED
+  changeAvailability
 } from '../controllers/adminController.js'
 
 import upload from '../middlewares/multer.js'
@@ -24,11 +24,11 @@ adminRouter.post("/add-doctor", authAdmin, upload.single("image"), addDoctor)
 // ALL DOCTORS
 adminRouter.get("/all-doctors", authAdmin, allDoctors)
 
-// CHANGE AVAILABILITY  ✅ NEW ROUTE
+// CHANGE AVAILABILITY
 adminRouter.post("/change-availability", authAdmin, changeAvailability)
 
 // DELETE DOCTOR
-adminRouter.delete("/delete-doctor/:id", authAdmin, deleteDoctor)
+adminRouter.delete("/delete-doctor/:doctorId", authAdmin, deleteDoctor)
 
 // ADMIN APPOINTMENTS
 adminRouter.get("/appointments", authAdmin, appointmentsAdmin)

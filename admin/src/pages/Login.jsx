@@ -10,7 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ⭐ Backend URL from admin/.env
+  // Backend URL from admin/.env
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const { setDToken } = useContext(DoctorContext);

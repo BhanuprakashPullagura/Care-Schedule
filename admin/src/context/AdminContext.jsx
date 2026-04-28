@@ -24,14 +24,14 @@ const AdminContextProvider = (props) => {
   // -------------------------------------
   const getAllDoctors = async () => {
     try {
-      console.log("➡️ Calling:", backendUrl + "/api/admin/all-doctors");
-      console.log("➡️ Headers:", { atoken: aToken });
+      console.log(" Calling:", backendUrl + "/api/admin/all-doctors");
+      console.log(" Headers:", { atoken: aToken });
 
       const { data } = await axios.get(backendUrl + "/api/admin/all-doctors", {
         headers: { atoken: aToken },
       });
 
-      console.log("⬅️ Response:", data);
+      console.log(" Response:", data);
 
       if (data.success) {
         setDoctors(data.doctors);
@@ -39,7 +39,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ getAllDoctors ERROR:", {
+      console.error(" getAllDoctors ERROR:", {
         message: error.message,
         status: error.response?.status,
         response: error.response?.data,
@@ -66,7 +66,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ changeAvailability ERROR:", error);
+      console.error(" changeAvailability ERROR:", error);
       toast.error(error.message || "Error updating availability");
     }
   };
@@ -90,7 +90,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ deleteDoctor ERROR:", error);
+      console.error(" deleteDoctor ERROR:", error);
       toast.error("Failed to delete doctor");
     }
   };
@@ -111,7 +111,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ getAllAppointments ERROR:", error);
+      console.error(" getAllAppointments ERROR:", error);
       toast.error(error.message || "Error loading appointments");
     }
   };
@@ -134,7 +134,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ cancelAppointment ERROR:", error);
+      console.error(" cancelAppointment ERROR:", error);
       toast.error(error.message || "Error cancelling appointment");
     }
   };
@@ -154,7 +154,7 @@ const AdminContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error("❌ getDashData ERROR:", error);
+      console.error(" getDashData ERROR:", error);
       toast.error("Error loading dashboard");
     }
   };

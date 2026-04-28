@@ -2,7 +2,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
-
+import sendEmail from "../lib/sendEmail.js"; 
+import userModel from "../models/userModel.js";
 /* =====================================================
    DOCTOR LOGIN
 ===================================================== */
@@ -119,28 +120,55 @@ const appointmentComplete = async (req, res) => {
   }
 };
 
-/* =====================================================
-   ADD PRESCRIPTION  ⭐ NEW
-===================================================== */
+
+
+//* =====================================================
+   //ADD MEDICAL RECORD (FINAL)
+//===================================================== *// 
 const addPrescription = async (req, res) => {
   try {
-    const { appointmentId, prescription } = req.body;
+
+    const { appointmentId, diagnosis, prescription, notes } = req.body;
+
     const docId = req.userId || req.body.docId;
 
     const appt = await appointmentModel.findById(appointmentId);
+
     if (!appt) {
       return res.json({ success: false, message: "Appointment not found" });
     }
 
-    // Optional: verify doctor belongs to this appointment
+    //  Doctor validation
     if (appt.docId.toString() !== docId.toString()) {
       return res.json({ success: false, message: "Unauthorized" });
     }
 
-    appt.prescription = prescription;
+    //  Update medical data
+    appt.diagnosis = diagnosis || "";
+    appt.prescription = prescription || "";
+    appt.notes = notes || "";
+    appt.isCompleted = true;
+
     await appt.save();
 
-    res.json({ success: true, message: "Prescription added" });
+    // ================= EMAIL ADDED (SAFE) =================
+    const user = await userModel.findById(appt.userId);
+
+    await sendEmail(
+      user.email,
+      "Your Prescription",
+      `<h3>Prescription Details</h3>
+       <p><strong>Doctor:</strong> ${appt.docData.name}</p>
+       <p><strong>Diagnosis:</strong> ${appt.diagnosis || "N/A"}</p>
+       <p><strong>Prescription:</strong> ${appt.prescription || "N/A"}</p>
+       <p><strong>Notes:</strong> ${appt.notes || "N/A"}</p>`
+    );
+    // =====================================================
+
+    res.json({
+      success: true,
+      message: "Medical record added successfully"
+    });
 
   } catch (error) {
     console.log("Add Prescription Error:", error);

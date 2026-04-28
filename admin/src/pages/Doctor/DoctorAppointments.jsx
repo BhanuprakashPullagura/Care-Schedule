@@ -10,10 +10,13 @@ const DoctorAppointments = () => {
   const { dToken, appointments, getAppointments, cancelAppointment, completeAppointment, backendUrl } = useContext(DoctorContext)
   const { slotDateFormat, calculateAge, currency } = useContext(AppContext)
 
-  // ⭐ NEW STATES FOR PRESCRIPTION POPUP
+  // ⭐ STATES
   const [showPresPopup, setShowPresPopup] = useState(false)
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null)
+
+  const [diagnosis, setDiagnosis] = useState("")
   const [prescriptionText, setPrescriptionText] = useState("")
+  const [notes, setNotes] = useState("")
 
   useEffect(() => {
     if (dToken) {
@@ -21,14 +24,16 @@ const DoctorAppointments = () => {
     }
   }, [dToken])
 
-  // ⭐ NEW — Submit prescription to backend
+  // ⭐ SUBMIT FUNCTION (FINAL)
   const submitPrescription = async () => {
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/doctor/add-prescription`,
         {
           appointmentId: selectedAppointmentId,
-          prescription: prescriptionText
+          diagnosis,
+          prescription: prescriptionText,
+          notes
         },
         {
           headers: { dtoken: dToken }
@@ -36,15 +41,22 @@ const DoctorAppointments = () => {
       );
 
       if (data.success) {
-        toast.success("Prescription Added");
-        setShowPresPopup(false);
-        getAppointments();  // refresh
+        toast.success("Medical Record Added");
+        setShowPresPopup(false)
+
+        // reset fields
+        setDiagnosis("")
+        setPrescriptionText("")
+        setNotes("")
+
+        getAppointments()
       } else {
-        toast.error(data.message);
+        toast.error(data.message)
       }
+
     } catch (error) {
-      toast.error("Error saving prescription");
-      console.log(error);
+      toast.error("Error saving data")
+      console.log(error)
     }
   };
 
@@ -54,6 +66,7 @@ const DoctorAppointments = () => {
       <p className='mb-3 text-lg font-medium'>All Appointments</p>
 
       <div className='bg-white border rounded text-sm max-h-[80vh] overflow-y-scroll'>
+        
         <div className='max-sm:hidden grid grid-cols-[0.5fr_2fr_1fr_1fr_3fr_1fr_1fr_1.5fr] gap-1 py-3 px-6 border-b'>
           <p>#</p>
           <p>Patient</p>
@@ -72,6 +85,7 @@ const DoctorAppointments = () => {
             gap-1 items-center text-gray-500 py-3 px-6 border-b hover:bg-gray-50' 
             key={index}
           >
+
             <p className='max-sm:hidden'>{index+1}</p>
 
             <div className='flex items-center gap-2'>
@@ -111,13 +125,15 @@ const DoctorAppointments = () => {
                   </div>
             }
 
-            {/* ⭐ Add / Edit Prescription Button */}
+            {/* ⭐ ADD / EDIT BUTTON */}
             <button
               className='text-blue-600 underline text-sm'
               onClick={() => {
-                setSelectedAppointmentId(item._id);
-                setPrescriptionText(item.prescription || "");
-                setShowPresPopup(true);
+                setSelectedAppointmentId(item._id)
+                setDiagnosis(item.diagnosis || "")
+                setPrescriptionText(item.prescription || "")
+                setNotes(item.notes || "")
+                setShowPresPopup(true)
               }}
             >
               {item.prescription ? "Edit" : "Add"} Prescription
@@ -127,20 +143,40 @@ const DoctorAppointments = () => {
         ))}
       </div>
 
-      {/* ⭐ POPUP UI */}
+      {/* ⭐ POPUP */}
       {showPresPopup && (
         <div className='fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50'>
+          
           <div className='bg-white p-5 rounded w-96 shadow-lg'>
-            <h2 className='text-lg font-semibold mb-3'>Write Prescription</h2>
 
+            <h2 className='text-lg font-semibold mb-3'>Add Medical Record</h2>
+
+            {/* Diagnosis */}
+            <input
+              className='w-full border p-2 rounded mb-2'
+              placeholder='Diagnosis'
+              value={diagnosis}
+              onChange={(e) => setDiagnosis(e.target.value)}
+            />
+
+            {/* Prescription */}
             <textarea
-              className='w-full h-40 border p-2 rounded'
-              placeholder='Enter prescription details...'
+              className='w-full h-20 border p-2 rounded mb-2'
+              placeholder='Prescription'
               value={prescriptionText}
               onChange={(e) => setPrescriptionText(e.target.value)}
             ></textarea>
 
+            {/* Notes */}
+            <textarea
+              className='w-full h-20 border p-2 rounded'
+              placeholder='Notes'
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            ></textarea>
+
             <div className='flex justify-end mt-3 gap-2'>
+              
               <button
                 className='px-4 py-1 rounded bg-gray-300'
                 onClick={() => setShowPresPopup(false)}
@@ -154,7 +190,9 @@ const DoctorAppointments = () => {
               >
                 Save
               </button>
+
             </div>
+
           </div>
         </div>
       )}

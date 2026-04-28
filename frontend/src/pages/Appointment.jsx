@@ -14,7 +14,7 @@ const Appointment = () => {
   const { doctors, currencySymbol, backendUrl, token, loadDoctorsFromDB } =
     useContext(AppContext);
 
-  const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU","FRI",  "SAT"];
 
   const [docInfo, setDocInfo] = useState(null);
   const [docSlots, setDocSlots] = useState([]);
@@ -92,7 +92,6 @@ const Appointment = () => {
       return navigate("/login");
     }
 
-    // Defensive checks
     if (!docSlots || docSlots.length === 0) {
       toast.error("No available slots");
       return;
@@ -102,8 +101,12 @@ const Appointment = () => {
       return;
     }
 
-    // If user hasn't clicked a time, pick first available in selected day
-    const finalSlotTime = slotTime || docSlots[slotIndex][0].time;
+    // ❗ User MUST select a time slot — no auto selection
+    if (!slotTime) {
+      toast.error("Please select a time slot");
+      return;
+    }
+
     const dateObj = docSlots[slotIndex][0].datetime;
     const day = dateObj.getDate();
     const month = dateObj.getMonth() + 1;
@@ -116,7 +119,7 @@ const Appointment = () => {
         {
           docId,
           slotDate,
-          slotTime: finalSlotTime,
+          slotTime,
         },
         { headers: { token } }
       );
@@ -124,12 +127,10 @@ const Appointment = () => {
       if (data.success) {
         toast.success(data.message || "Appointment booked");
 
-        // refresh data
         if (typeof loadDoctorsFromDB === "function") {
           await loadDoctorsFromDB();
         }
 
-        // navigate to my appointments
         navigate("/my-appointments");
       } else {
         toast.error(data.message || "Failed to book appointment");
@@ -201,8 +202,7 @@ const Appointment = () => {
             <div
               onClick={() => {
                 setSlotIndex(index);
-                // reset slotTime so if user moves day they need to pick (or first will be used)
-                setSlotTime("");
+                setSlotTime(""); // reset previously selected time
               }}
               key={index}
               className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${

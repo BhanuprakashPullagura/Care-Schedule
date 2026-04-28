@@ -5,7 +5,6 @@ const DoctorsList = () => {
 
   const { doctors, aToken, getAllDoctors, changeAvailability, deleteDoctor } = useContext(AdminContext)
 
-  // State for delete confirmation popup
   const [showPopup, setShowPopup] = useState(false)
   const [selectedDoctor, setSelectedDoctor] = useState(null)
 
@@ -15,13 +14,11 @@ const DoctorsList = () => {
     }
   }, [aToken])
 
-  // Handle delete click (show popup)
   const handleDeleteClick = (doctor) => {
     setSelectedDoctor(doctor)
     setShowPopup(true)
   }
 
-  // Confirm delete
   const confirmDelete = () => {
     deleteDoctor(selectedDoctor._id)
     setShowPopup(false)
@@ -34,44 +31,36 @@ const DoctorsList = () => {
       <div className='w-full flex flex-wrap gap-4 pt-5 gap-y-6'>
         {doctors.map((item, index) => (
           <div
-            className='border border-[#C9D8FF] rounded-xl max-w-56 overflow-hidden group'
+            className='border border-[#C9D8FF] rounded-xl max-w-56 p-4 bg-white shadow-sm'
             key={index}
           >
-            <img
-              className='bg-[#EAEFFF] group-hover:bg-primary transition-all duration-500'
-              src={item.image}
-              alt=""
-            />
 
-            <div className='p-4'>
-              <p className='text-[#262626] text-lg font-medium'>{item.name}</p>
-              <p className='text-[#5C5C5C] text-sm'>{item.speciality}</p>
+            {/* ❌ NO IMAGE AT ALL */}
 
-              <div className='mt-2 flex items-center gap-1 text-sm'>
-                <input
-                  onChange={() => changeAvailability(item._id)}
-                  type="checkbox"
-                  checked={item.available}
-                />
-                <p>Available</p>
-              </div>
+            <p className='text-[#262626] text-lg font-medium'>Dr. {item.name}</p>
+            <p className='text-[#5C5C5C] text-sm mb-2'>{item.speciality}</p>
 
-              {/* DELETE BUTTON */}
-              <button
-                onClick={() => handleDeleteClick(item)}
-                className='mt-3 bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 duration-200'
-              >
-                Delete
-              </button>
+            <div className='flex items-center gap-1 text-sm'>
+              <input
+                onChange={() => changeAvailability(item._id)}
+                type="checkbox"
+                checked={item.available}
+              />
+              <p>Available</p>
             </div>
+
+            <button
+              onClick={() => handleDeleteClick(item)}
+              className='mt-3 bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 duration-200'
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
 
-      {/* POPUP */}
       {showPopup && (
         <div className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-40 flex justify-center items-center z-50'>
-
           <div className='bg-white p-5 rounded-lg shadow-xl w-80'>
             <h2 className='text-lg font-semibold text-center'>
               Confirm Delete
@@ -83,7 +72,6 @@ const DoctorsList = () => {
             </p>
 
             <div className='flex justify-center gap-3 mt-4'>
-              
               <button
                 onClick={confirmDelete}
                 className='bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 duration-200'
@@ -97,10 +85,8 @@ const DoctorsList = () => {
               >
                 Cancel
               </button>
-
             </div>
           </div>
-
         </div>
       )}
 

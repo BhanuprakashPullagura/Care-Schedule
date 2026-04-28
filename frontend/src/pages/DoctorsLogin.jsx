@@ -29,7 +29,7 @@ const DoctorLogin = () => {
         toast.error(data.message)
       }
     } catch (err) {
-  console.log(err.response);   // ⭐ VERY IMPORTANT
+  console.log(err.response);   //  VERY IMPORTANT
   console.log(err.message);
   toast.error(err.response?.data?.message || "Login failed");
 }

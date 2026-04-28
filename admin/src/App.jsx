@@ -13,7 +13,7 @@ import AllAppointments from "./pages/Admin/AllAppointments";
 import AddDoctor from "./pages/Admin/AddDoctor";
 import DoctorsList from "./pages/Admin/DoctorsList";
 
-import Login from "./pages/Login.jsx";  // ✅ FIXED
+import Login from "./pages/Login.jsx";  // FIXED
 
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";

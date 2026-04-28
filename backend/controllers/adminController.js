@@ -36,8 +36,9 @@ export const loginAdmin = async (req, res) => {
   }
 };
 
+
 /* ========================
-   ADD DOCTOR
+   ADD DOCTOR (WITH IMAGE CROPPING)
 ======================== */
 export const addDoctor = async (req, res) => {
   try {
@@ -53,6 +54,7 @@ export const addDoctor = async (req, res) => {
       address,
     } = req.body;
 
+    // Required fields check
     if (
       !name ||
       !email ||
@@ -67,25 +69,58 @@ export const addDoctor = async (req, res) => {
       return res.json({ success: false, message: "Missing Details" });
     }
 
+    // Email validation
     if (!validator.isEmail(email)) {
       return res.json({ success: false, message: "Invalid email format" });
     }
 
+    // Password validation
     if (password.length < 8) {
-      return res.json({ success: false, message: "Password too short" });
+      return res.json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Duplicate doctor validation
+    const existingDoctor = await doctorModel.findOne({ email });
+    if (existingDoctor) {
+      return res.json({
+        success: false,
+        message: "Doctor already exists with this email",
+      });
+    }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ===============================
+    //   IMAGE UPLOAD WITH CROPPING
+    // ===============================
     let imageUrl = "";
     if (req.file) {
       const uploaded = await cloudinary.uploader.upload(req.file.path, {
         resource_type: "image",
+
+        // ⭐ Crop NEW doctor images to top area
+        crop: "fill",
+        gravity: "north",
+        width: 500,
+        height: 500,
       });
+
       imageUrl = uploaded.secure_url;
     }
 
+    // Parse address safely
+    let parsedAddress = {};
+    try {
+      parsedAddress = JSON.parse(address);
+    } catch {
+      return res.json({ success: false, message: "Invalid address format" });
+    }
+
+    // Save doctor
     const doctorData = {
       name,
       email,
@@ -96,20 +131,24 @@ export const addDoctor = async (req, res) => {
       about,
       fees,
       image: imageUrl,
-      address: JSON.parse(address),
+      address: parsedAddress,
       date: Date.now(),
       available: true,
     };
 
-    const newDoc = new doctorModel(doctorData);
-    await newDoc.save();
+    await doctorModel.create(doctorData);
 
-    res.json({ success: true, message: "Doctor Added" });
+    return res.json({
+      success: true,
+      message: "Doctor Added Successfully",
+    });
+
   } catch (error) {
     console.log("Add Doctor Error:", error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
+
 
 /* ========================
    DELETE DOCTOR
@@ -119,7 +158,6 @@ export const deleteDoctor = async (req, res) => {
     const doctorId = req.params.id;
 
     const doctor = await doctorModel.findById(doctorId);
-
     if (!doctor) {
       return res.json({ success: false, message: "Doctor not found" });
     }
@@ -139,6 +177,7 @@ export const deleteDoctor = async (req, res) => {
   }
 };
 
+
 /* ========================
    GET ALL DOCTORS
 ======================== */
@@ -152,8 +191,9 @@ export const allDoctors = async (req, res) => {
   }
 };
 
+
 /* ========================
-   CHANGE AVAILABILITY  ✅ NEW
+   CHANGE AVAILABILITY
 ======================== */
 export const changeAvailability = async (req, res) => {
   try {
@@ -178,6 +218,7 @@ export const changeAvailability = async (req, res) => {
   }
 };
 
+
 /* ========================
    GET ALL APPOINTMENTS
 ======================== */
@@ -191,8 +232,9 @@ export const appointmentsAdmin = async (req, res) => {
   }
 };
 
+
 /* ========================
-   ADMIN CANCEL APPOINTMENT
+   CANCEL APPOINTMENT
 ======================== */
 export const appointmentCancel = async (req, res) => {
   try {
@@ -210,7 +252,6 @@ export const appointmentCancel = async (req, res) => {
     });
 
     const { docId, slotDate, slotTime } = appt;
-
     const doctor = await doctorModel.findById(docId);
 
     if (doctor?.slots_booked?.[slotDate]) {
@@ -229,6 +270,7 @@ export const appointmentCancel = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
 
 /* ========================
    ADMIN DASHBOARD
